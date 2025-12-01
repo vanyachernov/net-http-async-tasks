@@ -38,12 +38,20 @@ public class HttpTask
     public DateTime? CompletedAt { get; set; }
     
     /// <summary>
-    /// Gets or sets the error message if the task failed.
+    /// Gets or sets the HTTP response status code.
+    /// Populated only when task completes successfully.
     /// </summary>
-    public string? ErrorMessage { get; set; }
+    public int? StatusCode { get; set; }
     
     /// <summary>
-    /// Gets or sets the result of the HTTP request execution.
+    /// Gets or sets the length of the response content in bytes.
+    /// Populated only when task completes successfully.
     /// </summary>
-    public HttpTaskResult? Result { get; set; }
+    public long? ContentLength { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the duration of the request execution in milliseconds.
+    /// Populated only when task completes successfully.
+    /// </summary>
+    public long? DurationMs { get; set; }
 }
