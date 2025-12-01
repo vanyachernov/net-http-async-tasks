@@ -1,6 +1,10 @@
+using HttpTaskService.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 {
     builder.Services.AddOpenApi();
+
+    builder.Services.AddInfrastructure();
 }
 
 var app = builder.Build();
@@ -11,8 +15,6 @@ var app = builder.Build();
     }
     
     app.MapGet("/health", () => Results.Ok("My service is working"));
-
-    // app.UseHttpsRedirection();
 
     app.Run();
 }
