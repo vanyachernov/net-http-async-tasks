@@ -1,19 +1,24 @@
 using HttpTaskService.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace HttpTaskService.Infrastructure;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(IConfiguration configuration) : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options) { }
+    private const string DATABASE = nameof(Database);
     
     public DbSet<HttpTask> HttpTasks { get; set; } = null!;
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-    
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+    }
+    
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder
+            .UseNpgsql(configuration.GetConnectionString(DATABASE))
+            .UseSnakeCaseNamingConvention();
     }
 }
