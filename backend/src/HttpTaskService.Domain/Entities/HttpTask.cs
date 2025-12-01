@@ -1,4 +1,4 @@
-using HttpTaskService.Domain.Shared;
+using TaskStatus = HttpTaskService.Domain.Shared.TaskStatus;
 
 namespace HttpTaskService.Domain.Entities;
 
