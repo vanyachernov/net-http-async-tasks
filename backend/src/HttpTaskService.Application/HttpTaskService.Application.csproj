@@ -10,8 +10,4 @@
       <ProjectReference Include="..\HttpTaskService.Domain\HttpTaskService.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Tasks\GetTask\" />
-    </ItemGroup>
-
 </Project>
