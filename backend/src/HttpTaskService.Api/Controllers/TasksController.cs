@@ -1,11 +1,14 @@
 using HttpTaskService.Application.Tasks.CreateTask;
+using HttpTaskService.Application.Tasks.GetTask;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HttpTaskService.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TasksController(CreateTaskHandler createTaskHandler) : ControllerBase
+public class TasksController(
+    CreateTaskHandler createTaskHandler,
+    GetTaskHandler getTaskHandler) : ControllerBase
 {
     /// <summary>
     /// Creates a new HTTP task to be executed asynchronously.
@@ -34,13 +37,29 @@ public class TasksController(CreateTaskHandler createTaskHandler) : ControllerBa
     }
     
     /// <summary>
-    /// Gets the task by ID (will be implemented later).
+    /// Gets the task result/status by its ID.
     /// </summary>
+    /// <param name="taskId">The task ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Task status and results if available</returns>
     [HttpGet("{taskId:guid}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetTaskResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RunningTaskResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CompletedTaskResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(FailedTaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetTask(Guid taskId)
+    public async Task<IActionResult> GetTask(
+        Guid taskId, 
+        CancellationToken cancellationToken)
     {
-        return NotFound();
+        var request = new GetTaskRequest(taskId);
+        var response = await getTaskHandler.Handle(request, cancellationToken);
+
+        if (response == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(response);
     }
 }
