@@ -45,19 +45,19 @@ public class GetTaskHandler
                 TaskStatus.Pending => new PendingTaskResponse
                 {
                     TaskId = task.Id,
-                    Status = nameof(TaskStatus.Pending)
+                    Status = "pending"
                 },
                 
                 TaskStatus.Running => new RunningTaskResponse
                 {
                     TaskId = task.Id,
-                    Status = nameof(TaskStatus.Running)
+                    Status = "running"
                 },
                 
                 TaskStatus.Completed => new CompletedTaskResponse
                 {
                     TaskId = task.Id,
-                    Status = nameof(TaskStatus.Completed),
+                    Status = "completed",
                     ResultDto = new CompletedTaskResultDto
                     {
                         Url = task.Url,
@@ -71,14 +71,14 @@ public class GetTaskHandler
                 TaskStatus.Failed => new FailedTaskResponse
                 {
                     TaskId = task.Id,
-                    Status = nameof(TaskStatus.Failed),
+                    Status = "failed",
                     Error = task.Error ?? "Unknown error"
                 },
                 
                 TaskStatus.Cancelled => new CancelledTaskResponse
                 {
                     TaskId = task.Id,
-                    Status = nameof(TaskStatus.Cancelled),
+                    Status = "cancelled",
                     CancelledAt = task.CancelledAt!.Value
                 },
                 
