@@ -24,7 +24,7 @@ public class GetTaskHandler
         GetTaskRequest request, 
         CancellationToken cancellationToken)
     {
-        _logger.LogDebug("Retrieving task {TaskId}", request.TaskId);
+        _logger.LogDebug($"Retrieving task with ID {request.TaskId}.");
 
         try
         {
@@ -34,30 +34,30 @@ public class GetTaskHandler
 
             if (task == null)
             {
-                _logger.LogWarning("Task {TaskId} not found", request.TaskId);
+                _logger.LogWarning($"Task {request.TaskId} not found.");
                 return null;
             }
 
-            _logger.LogDebug("Task {TaskId} found with status {Status}", task.Id, task.Status);
+            _logger.LogDebug($"Task with ID {task.Id} found with status \"{task.Status}\".");
 
             return task.Status switch
             {
                 TaskStatus.Pending => new PendingTaskResponse
                 {
                     TaskId = task.Id,
-                    Status = "pending"
+                    Status = nameof(TaskStatus.Pending)
                 },
                 
                 TaskStatus.Running => new RunningTaskResponse
                 {
                     TaskId = task.Id,
-                    Status = "running"
+                    Status = nameof(TaskStatus.Running)
                 },
                 
                 TaskStatus.Completed => new CompletedTaskResponse
                 {
                     TaskId = task.Id,
-                    Status = "completed",
+                    Status = nameof(TaskStatus.Completed),
                     ResultDto = new CompletedTaskResultDto
                     {
                         Url = task.Url,
@@ -71,7 +71,7 @@ public class GetTaskHandler
                 TaskStatus.Failed => new FailedTaskResponse
                 {
                     TaskId = task.Id,
-                    Status = "failed",
+                    Status = nameof(TaskStatus.Failed),
                     Error = task.Error ?? "Unknown error"
                 },
                 
@@ -80,8 +80,8 @@ public class GetTaskHandler
         }
         catch (Exception ex) when (ex is not InvalidOperationException)
         {
-            _logger.LogError(ex, "Error retrieving task {TaskId}", request.TaskId);
-            throw; // Re-throw to let controller handle it
+            _logger.LogError(ex, $"Error retrieving task with ID {request.TaskId}.");
+            throw;
         }
     }
 }

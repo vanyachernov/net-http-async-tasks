@@ -1,3 +1,4 @@
+using HttpTaskService.Application;
 using HttpTaskService.Infrastructure;
 using Scalar.AspNetCore;
 
@@ -6,7 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddOpenApi();
     builder.Services.AddControllers();
     
-    builder.Services.AddInfrastructure();
+    builder.Services
+        .AddApplication()
+        .AddInfrastructure();
 }
 
 var app = builder.Build();
