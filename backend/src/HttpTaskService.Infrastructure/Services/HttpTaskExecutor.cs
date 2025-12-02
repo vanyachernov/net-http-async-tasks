@@ -65,23 +65,16 @@ public class HttpTaskExecutor : IHttpTaskExecutor
             task.RetryCount++;
             task.LastRetryAt = DateTime.UtcNow;
 
-            _logger.LogError(ex, 
-                "Task {TaskId} failed after {Duration}ms (Retry {RetryCount}): {Error}", 
-                task.Id, task.DurationMs, task.RetryCount, ex.Message);
+            _logger.LogError(ex, $"Task with ID {task.Id} failed after {task.DurationMs}ms (Retry {task.RetryCount}): {ex.Message}");
         }
         
-        // Save final task state
         try
         {
             await _tasksRepository.UpdateTaskAsync(task, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, 
-                "Critical: Failed to save task {TaskId} results to database. Task completed but results lost. Status: {Status}", 
-                task.Id, task.Status);
-            // Don't re-throw - task execution completed, just couldn't save to DB
-            // Background service will pick it up again on next iteration if status is still Pending
+            _logger.LogError(ex, $"Critical: Failed to save task with ID {task.Id} results to database. Task completed but results lost. Status: \"{task.Status}\".");
         }
     }
 }
