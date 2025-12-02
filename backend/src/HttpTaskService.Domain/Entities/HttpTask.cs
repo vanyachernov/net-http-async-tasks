@@ -54,4 +54,10 @@ public class HttpTask
     /// Populated only when task completes successfully.
     /// </summary>
     public long? DurationMs { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the error message if the task execution failed.
+    /// Populated only when task status is Failed.
+    /// </summary>
+    public string? Error { get; set; }
 }
