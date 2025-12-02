@@ -75,12 +75,19 @@ public class GetTaskHandler
                     Error = task.Error ?? "Unknown error"
                 },
                 
+                TaskStatus.Cancelled => new CancelledTaskResponse
+                {
+                    TaskId = task.Id,
+                    Status = nameof(TaskStatus.Cancelled),
+                    CancelledAt = task.CancelledAt!.Value
+                },
+                
                 _ => throw new InvalidOperationException($"Unknown task status: {task.Status}")
             };
         }
         catch (Exception ex) when (ex is not InvalidOperationException)
         {
-            _logger.LogError(ex, $"Error retrieving task with ID {request.TaskId}.");
+            _logger.LogError(ex, $"Error retrieving task with ID {request.TaskId}");
             throw;
         }
     }

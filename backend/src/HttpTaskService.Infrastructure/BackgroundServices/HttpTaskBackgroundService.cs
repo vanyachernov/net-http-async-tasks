@@ -3,6 +3,7 @@ using HttpTaskService.Application.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TaskStatus = HttpTaskService.Domain.Shared.TaskStatus;
 
 namespace HttpTaskService.Infrastructure.BackgroundServices;
 
@@ -15,6 +16,11 @@ public class HttpTaskBackgroundService : BackgroundService
     private readonly ILogger<HttpTaskBackgroundService> _logger;
     private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(5);
     private const int MaxTasksPerBatch = 10;
+    
+    // Retry
+    private const int MaxRetries = 3;
+    private const int BaseRetryDelaySeconds = 5;
+    private const double RetryBackoffMultiplier = 2.0;
 
     public HttpTaskBackgroundService(
         IServiceScopeFactory serviceScopeFactory,
@@ -52,18 +58,27 @@ public class HttpTaskBackgroundService : BackgroundService
         var tasksRepository = scope.ServiceProvider.GetRequiredService<ITasksRepository>();
         var taskExecutor = scope.ServiceProvider.GetRequiredService<IHttpTaskExecutor>();
 
-        var pendingTasks = await tasksRepository.GetPendingTasksAsync(
-            MaxTasksPerBatch, 
+        var retryableTasks = await tasksRepository.GetRetryableTasksAsync(
+            MaxTasksPerBatch,
+            MaxRetries,
+            BaseRetryDelaySeconds,
+            RetryBackoffMultiplier,
             cancellationToken);
 
-        if (pendingTasks.Count > 0)
+        if (retryableTasks.Count > 0)
         {
-            _logger.LogInformation($"Found {pendingTasks.Count} pending tasks to process...");
+            _logger.LogInformation($"Found {retryableTasks.Count} retryable tasks to process");
 
-            foreach (var task in pendingTasks)
+            foreach (var task in retryableTasks)
             {
                 if (cancellationToken.IsCancellationRequested)
                     break;
+
+                if (task.Status == TaskStatus.Cancelled)
+                {
+                    _logger.LogDebug($"Skipping cancelled task with ID {task.Id}");
+                    continue;
+                }
 
                 try
                 {
@@ -71,7 +86,7 @@ public class HttpTaskBackgroundService : BackgroundService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Unexpected error while executing task with ID {task.Id}.");
+                    _logger.LogError(ex, $"Unexpected error while executing task with ID {task.Id}");
                 }
             }
         }

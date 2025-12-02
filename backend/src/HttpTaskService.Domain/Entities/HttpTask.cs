@@ -60,4 +60,19 @@ public class HttpTask
     /// Populated only when task status is Failed.
     /// </summary>
     public string? Error { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the number of retry attempts made for this task.
+    /// </summary>
+    public int RetryCount { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the date and time of the last retry attempt.
+    /// </summary>
+    public DateTime? LastRetryAt { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the date and time when the task was cancelled.
+    /// </summary>
+    public DateTime? CancelledAt { get; set; }
 }
