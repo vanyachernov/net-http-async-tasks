@@ -58,7 +58,7 @@ public class HttpTaskBackgroundService : BackgroundService
 
         if (pendingTasks.Count > 0)
         {
-            _logger.LogInformation("Found {Count} pending tasks to process", pendingTasks.Count);
+            _logger.LogInformation($"Found {pendingTasks.Count} pending tasks to process...");
 
             foreach (var task in pendingTasks)
             {
@@ -71,8 +71,7 @@ public class HttpTaskBackgroundService : BackgroundService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, 
-                        "Unexpected error while executing task {TaskId}", task.Id);
+                    _logger.LogError(ex, $"Unexpected error while executing task with ID {task.Id}.");
                 }
             }
         }

@@ -28,12 +28,11 @@ public class HttpTaskExecutor : IHttpTaskExecutor
 
     public async Task ExecuteTaskAsync(HttpTask task, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Starting execution of task {TaskId} for URL: {Url}", 
-            task.Id, task.Url);
-
-        // Update task status to Running
+        _logger.LogInformation($"Starting execution of task with ID {task.Id} for URL {task.Url}...");
+        
         task.Status = TaskStatus.Running;
         task.StartedAt = DateTime.UtcNow;
+        
         await _tasksRepository.UpdateTaskAsync(task, cancellationToken);
 
         var stopwatch = Stopwatch.StartNew();
@@ -46,17 +45,14 @@ public class HttpTaskExecutor : IHttpTaskExecutor
             var response = await httpClient.GetAsync(task.Url, cancellationToken);
             
             stopwatch.Stop();
-
-            // Collect response data
+            
             task.StatusCode = (int)response.StatusCode;
             task.ContentLength = response.Content.Headers.ContentLength ?? 0;
             task.DurationMs = stopwatch.ElapsedMilliseconds;
             task.CompletedAt = DateTime.UtcNow;
             task.Status = TaskStatus.Completed;
 
-            _logger.LogInformation(
-                "Task {TaskId} completed successfully. Status: {StatusCode}, Duration: {Duration}ms", 
-                task.Id, task.StatusCode, task.DurationMs);
+            _logger.LogInformation($"Task with ID {task.Id} completed successfully. Status: {task.StatusCode}, Duration: {task.DurationMs}ms");
         }
         catch (Exception ex)
         {
@@ -67,11 +63,16 @@ public class HttpTaskExecutor : IHttpTaskExecutor
             task.CompletedAt = DateTime.UtcNow;
             task.DurationMs = stopwatch.ElapsedMilliseconds;
 
-            _logger.LogError(ex, "Task {TaskId} failed after {Duration}ms: {Error}", 
-                task.Id, task.DurationMs, ex.Message);
+            _logger.LogError(ex, $"Task with ID {task.Id} failed after {task.DurationMs}ms: {ex.Message}");
         }
-
-        // Save final task state
-        await _tasksRepository.UpdateTaskAsync(task, cancellationToken);
+        
+        try
+        {
+            await _tasksRepository.UpdateTaskAsync(task, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Critical: Failed to save task with ID {task.Id} results to database. Task completed but results lost. Status: \"{task.Status}\"");
+        }
     }
 }

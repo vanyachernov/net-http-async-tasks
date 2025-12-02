@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using HttpTaskService.Application.DTOs;
 
 namespace HttpTaskService.Application.Tasks.GetTask;
 
@@ -8,5 +9,5 @@ namespace HttpTaskService.Application.Tasks.GetTask;
 public record CompletedTaskResponse : GetTaskResponse
 {
     [JsonPropertyName("result")]
-    public required CompletedTaskResult Result { get; init; }
+    public required CompletedTaskResultDto ResultDto { get; init; }
 }
