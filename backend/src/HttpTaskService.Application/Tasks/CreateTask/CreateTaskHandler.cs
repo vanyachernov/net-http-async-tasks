@@ -2,7 +2,7 @@ using HttpTaskService.Domain.Entities;
 
 namespace HttpTaskService.Application.Tasks.CreateTask;
 
-public class CreateVolunteerHandler(ITasksRepository tasksRepository)
+public class CreateTaskHandler(ITasksRepository tasksRepository)
 {
     public async Task<TaskCreatedResponse> Handle(
         CreateTaskRequest request, 
@@ -10,13 +10,18 @@ public class CreateVolunteerHandler(ITasksRepository tasksRepository)
     {
         var newTask = new HttpTask
         {
-            Url = request.Url
+            Id = Guid.NewGuid(),
+            Url = request.Url,
+            Status = Domain.Shared.TaskStatus.Pending,
+            CreatedAt = DateTime.UtcNow
         };
 
         var createdTask = await tasksRepository.CreateTaskAsync(
             newTask, 
             cancellationToken);
 
-        return new TaskCreatedResponse(createdTask.Id);
+        return new TaskCreatedResponse(
+            createdTask.Id, 
+            createdTask.Status.ToString().ToLower());
     }
 }
