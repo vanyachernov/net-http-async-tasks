@@ -1,11 +1,11 @@
 using System.Text.Json.Serialization;
 
-namespace HttpTaskService.Application.Tasks.GetTask;
+namespace HttpTaskService.Application.DTOs;
 
 /// <summary>
 /// Result data for completed tasks.
 /// </summary>
-public record CompletedTaskResult
+public record CompletedTaskResultDto
 {
     [JsonPropertyName("url")]
     public required string Url { get; init; }

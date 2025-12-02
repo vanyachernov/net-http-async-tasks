@@ -13,23 +13,12 @@ public static class Injector
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        // Database
         services.AddScoped<ApplicationDbContext>();
-        
-        // Repositories
         services.AddScoped<ITasksRepository, TasksRepository>();
-        
-        // Handlers
         services.AddScoped<CreateTaskHandler>();
         services.AddScoped<GetTaskHandler>();
-        
-        // HTTP Client
         services.AddHttpClient();
-        
-        // Services
         services.AddScoped<IHttpTaskExecutor, HttpTaskExecutor>();
-        
-        // Background Services
         services.AddHostedService<HttpTaskBackgroundService>();
         
         return services;
