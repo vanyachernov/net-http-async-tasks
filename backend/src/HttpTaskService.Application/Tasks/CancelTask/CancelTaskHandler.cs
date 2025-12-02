@@ -39,8 +39,8 @@ public class CancelTaskHandler
 
             if (task.Status != TaskStatus.Pending && task.Status != TaskStatus.Running)
             {
-                _logger.LogWarning($"Cannot cancel task with ID {task.Id} with status {task.Status}");
-                throw new InvalidOperationException($"Cannot cancel task with status \"{task.Status.ToString().ToLower()}\".");
+                _logger.LogWarning("Cannot cancel task {TaskId} with status {Status}", task.Id, task.Status);
+                throw new InvalidOperationException($"Cannot cancel task with status '{task.Status.ToString().ToLower()}'");
             }
 
             task.Status = TaskStatus.Cancelled;
@@ -48,12 +48,12 @@ public class CancelTaskHandler
 
             await _tasksRepository.UpdateTaskAsync(task, cancellationToken);
 
-            _logger.LogInformation($"Task with ID {task.Id} cancelled successfully");
+            _logger.LogInformation("Task {TaskId} cancelled successfully", task.Id);
 
             return new CancelTaskResponse
             {
                 TaskId = task.Id,
-                Status = nameof(TaskStatus.Cancelled)
+                Status = "cancelled"
             };
         }
         catch (InvalidOperationException)
