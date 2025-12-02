@@ -1,3 +1,4 @@
+using HttpTaskService.Application.Tasks.CancelTask;
 using HttpTaskService.Application.Tasks.CreateTask;
 using HttpTaskService.Application.Tasks.GetTask;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,8 @@ namespace HttpTaskService.Api.Controllers;
 [Route("api/[controller]")]
 public class TasksController(
     CreateTaskHandler createTaskHandler,
-    GetTaskHandler getTaskHandler) : ControllerBase
+    GetTaskHandler getTaskHandler,
+    CancelTaskHandler cancelTaskHandler) : ControllerBase
 {
     /// <summary>
     /// Creates a new HTTP task to be executed asynchronously.
@@ -43,10 +45,11 @@ public class TasksController(
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task status and results if available</returns>
     [HttpGet("{taskId:guid}")]
-    [ProducesResponseType(typeof(GetTaskResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PendingTaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(RunningTaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(CompletedTaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(FailedTaskResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CancelledTaskResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTask(
         Guid taskId, 
@@ -61,5 +64,37 @@ public class TasksController(
         }
 
         return Ok(response);
+    }
+    
+    /// <summary>
+    /// Cancels a pending or running task.
+    /// </summary>
+    /// <param name="taskId">The task ID</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Cancelled task response</returns>
+    [HttpPatch("{taskId:guid}/cancel")]
+    [ProducesResponseType(typeof(CancelTaskResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CancelTask(
+        Guid taskId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var request = new CancelTaskRequest(taskId);
+            var response = await cancelTaskHandler.Handle(request, cancellationToken);
+
+            if (response == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 }

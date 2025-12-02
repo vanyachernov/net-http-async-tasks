@@ -23,5 +23,10 @@ public enum TaskStatus
     /// <summary>
     /// Task execution has failed.
     /// </summary>
-    Failed = 3
+    Failed = 3,
+    
+    /// <summary>
+    /// Task has been cancelled by user.
+    /// </summary>
+    Cancelled = 4
 }
