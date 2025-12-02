@@ -26,7 +26,7 @@ public class HttpTaskBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("HTTP Task Background Service started");
+        _logger.LogInformation("HTTP Task Background Service started...");
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -42,7 +42,7 @@ public class HttpTaskBackgroundService : BackgroundService
             await Task.Delay(_pollingInterval, stoppingToken);
         }
 
-        _logger.LogInformation("HTTP Task Background Service stopped");
+        _logger.LogInformation("HTTP Task Background Service stopped.");
     }
 
     private async Task ProcessPendingTasksAsync(CancellationToken cancellationToken)
